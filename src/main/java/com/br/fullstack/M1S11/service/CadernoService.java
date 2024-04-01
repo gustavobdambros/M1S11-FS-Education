@@ -6,7 +6,8 @@ import com.br.fullstack.M1S11.datasource.entity.CadernoEntity;
 import com.br.fullstack.M1S11.datasource.entity.UsuarioEntity;
 import com.br.fullstack.M1S11.datasource.repository.CadernoRepository;
 import com.br.fullstack.M1S11.datasource.repository.UsuarioRepository;
-import com.br.fullstack.M1S11.exception.NotFoundException;
+import com.br.fullstack.M1S11.exception.error.findByUsuarioIdAndIdCadernoNotFoundException;
+import com.br.fullstack.M1S11.exception.error.findByUsuarioIdCadernoNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Service;
@@ -43,7 +44,7 @@ public class CadernoService {
     public CadernoResponse salvarCaderno(InserirCadernoRequest incluiCadernoRequest, String token) {
         Long idUsuario = extractUserId(token);
 
-        UsuarioEntity usuario = usuarioRepository.findById(idUsuario).orElseThrow();
+        UsuarioEntity usuario = usuarioRepository.findById(idUsuario).orElseThrow(() -> new findByUsuarioIdCadernoNotFoundException(idUsuario));
 
         CadernoEntity cadernoEntity = new CadernoEntity();
         cadernoEntity.setUsuario(usuario);
@@ -59,7 +60,7 @@ public class CadernoService {
         Long idUsuario = extractUserId(token);
 
         CadernoEntity cadernoEntity = cadernoRepository.findByUsuarioIdAndId(idUsuario, id)
-                .orElseThrow(() -> new NotFoundException("Caderno com o id " + id + " não encontrada"));
+                .orElseThrow(() -> new findByUsuarioIdAndIdCadernoNotFoundException(id));
 
         return new CadernoResponse(cadernoEntity.getId(), cadernoEntity.getNome());
     }
@@ -68,7 +69,7 @@ public class CadernoService {
         Long idUsuario = extractUserId(token);
 
         CadernoEntity cadernoExistente = cadernoRepository.findByUsuarioIdAndId(idUsuario, id)
-                .orElseThrow(() -> new NotFoundException("Caderno com o ID " + id + " não encontrada"));
+                .orElseThrow(() -> new findByUsuarioIdAndIdCadernoNotFoundException(id));
 
         // Atualiza os campos da caderno com base nos dados da requisição
         cadernoExistente.setNome(incluiCadernoRequest.nome());
@@ -85,7 +86,7 @@ public class CadernoService {
 
         // Verificar se o caderno pertence ao usuário antes de excluí-lo
         CadernoEntity caderno = cadernoRepository.findByUsuarioIdAndId(idUsuario, id)
-                .orElseThrow(() -> new NotFoundException("Caderno com o ID " + id + " não encontrado"));
+                .orElseThrow(() -> new findByUsuarioIdAndIdCadernoNotFoundException(id));
 
         // Excluir o caderno
         cadernoRepository.delete(caderno);
