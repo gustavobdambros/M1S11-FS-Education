@@ -54,7 +54,8 @@ public class NotaService {
 
         // Obtenha o caderno com o qual a nota está associada
         CadernoEntity caderno = cadernoRepository.findFirstByUsuarioIdOrderByCreationTimestampAsc(idUsuario)
-                .orElseThrow(() -> new NotFoundException("Caderno não encontrado para o usuário"));
+                .orElseThrow(() -> new NotFoundException("Não foi possível criar uma nota, pois não há nenhum caderno " +
+                        "vinculado."));
 
         NotaEntity notaEntity = new NotaEntity();
         notaEntity.setUsuario(usuario);
